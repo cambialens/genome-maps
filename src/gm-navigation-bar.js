@@ -469,12 +469,10 @@ GmNavigationBar.prototype = {
             if (featureName.slice(0, "rs".length) == "rs" || featureName.slice(0, "AFFY_".length) == "AFFY_" || featureName.slice(0, "SNP_".length) == "SNP_" || featureName.slice(0, "VAR_".length) == "VAR_" || featureName.slice(0, "CRTAP_".length) == "CRTAP_" || featureName.slice(0, "FKBP10_".length) == "FKBP10_" || featureName.slice(0, "LEPRE1_".length) == "LEPRE1_" || featureName.slice(0, "PPIB_".length) == "PPIB_") {
                 this.openSNPListWidget(featureName);
             } else {
-                console.log(featureName);
                 // TO-DO: gene list widget to be implemented
                 // this.openGeneListWidget(featureName);
 
                 // meanwhile the location of feature is set
-                console.log(this.species);
                 var _this = this;
 
                 CellBaseManager.get({
@@ -484,15 +482,20 @@ GmNavigationBar.prototype = {
                     query: featureName,
                     resource: 'info',
                     params: {
-                        include: 'chromosome,start,end'
+                        include: 'chromosome,start,end,id'
                     },
                     success: function (data) {
-                        var feat = data.response[0].result[0];
-                        var regionStr = feat.chromosome + ":" + feat.start + "-" + feat.end;
-                        var region = new Region();
-                        region.parse(regionStr);
-                        _this.region = region;
-                        _this.trigger('region:change', {region: _this.region, sender: _this});
+                        try {
+                            var feat = data.response[0].result[0];
+                            var regionStr = feat.chromosome + ":" + feat.start + "-" + feat.end;
+                            var region = new Region();
+                            region.parse(regionStr);
+                            _this.region = region;
+                            _this.trigger('region:change', { region: _this.region, sender: _this, quickSearch: feat });
+                        }
+                        catch (e) {
+                            _this.trigger('error:gofeature')
+                        }
                     }
                 });
             }
